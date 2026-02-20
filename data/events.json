@@ -1,0 +1,44 @@
+{
+  "events": {
+    "demo": {
+      "name": "TUNZZA Demo Event",
+      "showGifts": true,
+      "showMoments": true,
+      "lipaNumber": "123456",
+      "ussd": "*150*00#",
+      "uploadLink": "https://www.dropbox.com/request/demo"
+    },
+
+    "wedding-john-mary": {
+      "name": "John & Mary Wedding",
+      "showGifts": true,
+      "showMoments": true,
+      "lipaNumber": "888777",
+      "ussd": "*150*00#",
+      "uploadLink": "https://www.dropbox.com/request/wedding"
+    },
+
+    "corporate-launch": {
+      "name": "Brand Launch Night",
+      "showGifts": false,
+      "showMoments": true,
+      "uploadLink": "https://www.dropbox.com/request/brandlaunch"
+    },
+
+    "vip-dinner": {
+      "name": "Private VIP Dinner",
+      "showGifts": true,
+      "showMoments": false,
+      "lipaNumber": "555222",
+      "ussd": "*150*00#"
+    },
+
+    "wedding-mussa-samiji": {
+      "name": "Mussa & Samiji Event",
+      "showGifts": false,
+      "showMoments": true,
+      "lipaNumber": "123456",
+      "uploadLink": "wa.me/255745809605"
+    }
+  }
+}

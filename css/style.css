@@ -1,0 +1,187 @@
+/* css/style.css
+   TUNZZA — Luxury minimalist styling
+   Deep Charcoal + Champagne Gold palette
+*/
+
+/* Theme tokens */
+:root{
+  --bg: #121212;             /* deep charcoal */
+  --panel: rgba(255,255,255,0.03);
+  --gold: #D4AF37;           /* champagne gold */
+  --muted: #bdbdbd;
+  --glass: rgba(255,255,255,0.02);
+  --max-width: 720px;
+  --radius: 16px;
+  --gap: 20px;
+  --ui-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --page-pad: calc(24px + env(safe-area-inset-top));
+}
+
+/* Reset & base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color: #fff;
+  font-family: var(--ui-font);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+  padding: 0;
+}
+
+/* Bridge container centering */
+.bridge{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: var(--page-pad) 20px 40px;
+}
+
+/* Card / panel */
+.card{
+  width:100%;
+  max-width:var(--max-width);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: var(--radius);
+  padding: clamp(20px, 4.5vw, 36px);
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  text-align:center;
+  transform-origin:center;
+}
+
+/* Brand & headline */
+.brand{
+  font-family: var(--serif);
+  color: var(--gold);
+  font-weight:600;
+  font-size: 28px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.headline{
+  font-family: var(--serif);
+  font-size: clamp(18px, 2.6vw, 22px);
+  margin: 4px 0 8px 0;
+  color: #fff;
+  font-weight: 500;
+}
+
+.sub{
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 20px;
+  opacity: 0.95;
+}
+
+/* Actions row */
+.actions{
+  display:flex;
+  gap: calc(var(--gap) / 2);
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  margin: 8px 0;
+}
+
+/* Buttons */
+.btn{
+  appearance:none;
+  -webkit-appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  min-width: 170px;
+  user-select: none;
+}
+
+/* Primary button */
+.btn--primary{
+  color: var(--gold);
+  background: linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.03));
+  border: 1px solid rgba(212,175,55,0.16);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+/* Button interactions */
+.btn:active{ transform: translateY(1px) scale(.998) }
+.btn:hover{ transform: translateY(-2px) }
+.btn:focus{
+  outline: 3px solid rgba(212,175,55,0.12);
+  outline-offset: 3px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+/* Small metadata */
+.micro{ font-size: 13px; color: var(--muted); margin-top: 12px; opacity:0.95; }
+.foot{ margin-top: 16px; font-size: 12px; color: var(--muted) }
+
+/* Gallery placeholder */
+.gallery{
+  margin-top: 22px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  opacity: 0.0; /* hidden by default; we'll reveal later if needed */
+}
+
+/* Tiny image card */
+.gallery .thumb{
+  background: var(--glass);
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+/* Toast (small feedback) */
+#tunzza-toast{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+  background: rgba(20,20,20,0.95);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(212,175,55,0.12);
+  font-size: 13px;
+  z-index: 9999;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* Responsive: place actions inline on wider screens */
+@media (min-width:640px){
+  .actions{ flex-direction: row; }
+  .btn{ min-width: 200px; }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce){
+  .btn, .card, #tunzza-toast { transition: none !important; animation: none !important; }
+}
+
+/* Small helper for subtle divider */
+.divider{
+  height:1px;
+  background: rgba(255,255,255,0.02);
+  margin: 18px 0;
+  border-radius: 1px;
+}

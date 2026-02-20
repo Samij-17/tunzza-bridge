@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TUNZZA — Bridge</title>
+
+  <!-- Luxury serif for headings; system fonts for UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- main stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Accessible landmark -->
+  <main class="bridge" id="app" aria-live="polite">
+    <header class="card" role="banner" aria-label="Tunzza event bridge">
+      <div class="brand" id="brand">TUNZZA</div>
+      <h1 class="headline" id="event-title">Your Event — Loading…</h1>
+      <p class="sub" id="event-sub">No apps. Instant. Elegant.</p>
+
+      <!-- Action buttons (we'll style these next) -->
+      <div class="actions" role="group" aria-label="Bridge actions">
+        <button id="giftBtn" class="btn btn--primary" aria-controls="lipaNumber">🎁 Gift / Lipa</button>
+        <button id="momentBtn" class="btn" aria-controls="uploadLink">📷 Share Moment</button>
+      </div>
+
+      <!-- small info row -->
+      <p class="micro">Number: <span id="lipaNumber">--</span></p>
+      <p class="foot" id="footNote">No app required — upload anonymously or pay via phone.</p>
+    </header>
+
+    <!-- future: private gallery preview or admin area -->
+    <section id="gallery" class="gallery" aria-hidden="true"></section>
+  </main>
+
+  <!-- app logic (we'll build this in Step 4) -->
+  <script defer src="js/app.js"></script>
+</body>
+</html>
