@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TUNZZA — Admin</title>
+  <title>TUNZZA — Admin (Firebase)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{--bg:#0f1112;--panel:#121212;--muted:#bdbdbd;--gold:#D4AF37}
@@ -11,264 +11,440 @@
     body{margin:0;background:var(--bg);color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;min-height:100vh;padding:28px}
     .wrap{max-width:980px;margin:0 auto}
     h1{font-family:"Playfair Display",serif;margin:0 0 6px 0;color:var(--gold)}
-    p.lead{color:var(--muted);margin:0 0 18px 0}
-    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-    form.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-    input[type=text],input[type=url]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
-    .full{grid-column:1/-1}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03));color:var(--gold);border:1px solid rgba(212,175,55,0.18)}
-    .grid{margin-top:18px;display:grid;gap:8px}
-    .item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
-    .meta{font-size:13px;color:var(--muted)}
+    .hint{color:var(--muted);font-size:13px;margin-bottom:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
+    textarea{min-height:80px}
+    button{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.03));color:var(--gold);border:1px solid rgba(212,175,55,0.14)}
     .small{font-size:13px;color:var(--muted)}
-    .controls{display:flex;gap:8px}
-    .danger{border-color:rgba(255,80,80,0.15);color:#ff9fa0}
-    pre{white-space:pre-wrap;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);max-height:220px;overflow:auto;margin-top:12px}
-    .hint{font-size:13px;color:var(--muted);margin-top:8px}
+    .events{margin-top:12px}
+    .event{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01);margin-bottom:8px;border:1px solid rgba(255,255,255,0.02)}
+    pre{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;color:var(--muted);max-height:180px;overflow:auto}
+    .loginCard{max-width:420px;margin-bottom:18px}
+    .qr{display:inline-block;margin-left:10px;vertical-align:middle}
+    .uploads-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .upload-thumb{width:86px;height:86px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:11px;padding:6px}
+    .controls{display:flex;gap:6px}
+    .muted{color:var(--muted)}
+    .footer-controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+    @media (max-width:880px){
+      .grid-cols{display:block}
+      .card { padding: 14px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>TUNZZA — Admin</h1>
-    <p class="lead">Add, edit or remove event configs. When finished, download <code>events.json</code> and push it to your site root (or copy to clipboard).</p>
+    <div class="hint">Sign in to manage events. Events are stored in Firestore and the public bridge reads them live. Use the generated URL or QR for printing QR stands.</div>
 
-    <div class="panel" id="adminPanel">
-      <form id="eventForm" onsubmit="return false;">
-        <div class="row">
-          <div>
-            <label for="slug">Event Slug (unique)</label>
-            <input id="slug" type="text" placeholder="e.g., wedding-john-mary" />
-          </div>
-          <div>
-            <label for="name">Event Name</label>
-            <input id="name" type="text" placeholder="John & Mary — Wedding" />
-          </div>
+    <div class="card loginCard" id="authCard">
+      <div id="authState"><!-- login form injected here --></div>
+    </div>
 
+    <div id="adminArea" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <label for="lipaNumber">Lipa Number (optional)</label>
-            <input id="lipaNumber" type="text" placeholder="0765123456" />
+            <div class="small">Logged in as <span id="userEmail" class="small" style="font-weight:600"></span></div>
+            <div class="small" style="margin-top:6px">Create / edit events below. Slugs are used in URLs: <code>?e=slug</code></div>
           </div>
           <div>
-            <label for="ussd">USSD (optional)</label>
-            <input id="ussd" type="text" placeholder="*150*00#" />
+            <button id="btnSignOut">Sign out</button>
           </div>
+        </div>
 
-          <div class="full">
-            <label for="uploadLink">Upload Link (Dropbox File Request or other)</label>
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:12px 0">
+
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:12px" class="grid-cols">
+          <div>
+            <label class="small">Event slug (unique)</label><br>
+            <input id="slug" placeholder="wedding-john-mary" />
+            <div style="height:8px"></div>
+
+            <label class="small">Event name (display)</label><br>
+            <input id="name" placeholder="John & Mary — Wedding" />
+            <div style="height:8px"></div>
+
+            <label class="small">Lipa number (optional)</label><br>
+            <input id="lipa" placeholder="0765123456" />
+            <div style="height:8px"></div>
+
+            <label class="small">USSD (optional)</label><br>
+            <input id="ussd" placeholder="*150*00#" />
+            <div style="height:8px"></div>
+
+            <label class="small">Upload option</label><br>
+            <select id="uploadOption">
+              <option value="filestack">Filestack (recommended)</option>
+              <option value="dropbox">Dropbox File Request (legacy)</option>
+              <option value="link">Link (any upload URL)</option>
+              <option value="none">None</option>
+            </select>
+
+            <div style="height:10px"></div>
+
+            <label class="small">Upload link (for Dropbox / link option)</label><br>
             <input id="uploadLink" type="url" placeholder="https://www.dropbox.com/request/XXXXX" />
+            <div style="height:8px"></div>
           </div>
 
           <div>
-            <label>Show Gifts</label>
-            <div><input id="showGifts" type="checkbox" /> <span class="small">Enable gifting</span></div>
+            <label class="small">Theme color (hex)</label><br>
+            <input id="themeColor" placeholder="#D4AF37" />
+            <div style="height:8px"></div>
+
+            <label class="small">Hero image URL (optional)</label><br>
+            <input id="hero" placeholder="https://..." />
+            <div style="height:8px"></div>
+
+            <label class="small">Filestack client key (for Filestack uploads)</label><br>
+            <input id="filestackKey" placeholder="FILSTACK_CLIENT_KEY" />
+            <div style="height:8px"></div>
+
+            <label class="small">Show gifts?</label><br>
+            <select id="showGifts"><option value="true">Yes</option><option value="false">No</option></select>
+            <div style="height:8px"></div>
+
+            <label class="small">Show moments?</label><br>
+            <select id="showMoments"><option value="true">Yes</option><option value="false">No</option></select>
           </div>
-          <div>
-            <label>Show Moments</label>
-            <div><input id="showMoments" type="checkbox" /> <span class="small">Enable photo uploads</span></div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button id="btnSave" class="btn btn-primary">Create / Update event</button>
+          <button id="btnLoad" class="btn">Load event</button>
+          <button id="btnDelete" class="btn" style="border-color:rgba(255,80,80,0.12)">Delete event</button>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label class="small" style="margin-right:6px">Export function URL</label>
+            <input id="exportEndpoint" placeholder="https://.../create-zip" style="min-width:260px" />
           </div>
         </div>
 
-        <div class="actions">
-          <button id="addBtn" class="btn btn-primary">Add / Update Event</button>
-          <button id="clearBtn" class="btn">Clear Form</button>
-          <button id="downloadBtn" class="btn">Download events.json</button>
-          <button id="copyBtn" class="btn">Copy JSON</button>
-        </div>
-      </form>
+        <div class="hint" style="margin-top:12px">Existing events</div>
+        <div id="events" class="events"></div>
 
-      <div class="hint">Loaded events (click to edit)</div>
-      <div class="grid" id="eventsList" aria-live="polite"></div>
-
-      <div style="margin-top:18px">
-        <div class="hint">Preview JSON</div>
-        <pre id="jsonPreview">{ }</pre>
-        <div class="hint">To apply changes to your live site:
-          <ul>
-            <li>Option 1 (manual): Upload the downloaded <code>events.json</code> to your repo root via the :contentReference[oaicite:5]{index=5} web editor or replace the file in your Netlify site. (Fast and safe.)</li>
-            <li>Option 2 (automated): Use a server-side function (Netlify Function or GitHub Action) to commit the updated file — I can show this later.</li>
-          </ul>
+        <div style="margin-top:10px">
+          <div class="small">Event JSON preview</div>
+          <pre id="preview">{ }</pre>
         </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Uploads preview for selected event</div>
+          <div id="uploadsPreview" style="margin-top:8px">
+            <div id="uploadsList" class="uploads-grid muted">No event selected — load an event to view uploads.</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-<script>
-/* Admin Page JS (client-only) */
-(async function(){
-  // DOM
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+  // ====== PASTE YOUR FIREBASE CONFIG HERE ======
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAcyZWb7soqLZE2585Xc8gXypXklBezuRQ",
+    authDomain: "tunzza-live.firebaseapp.com",
+    projectId: "tunzza-live",
+    storageBucket: "tunzza-live.firebasestorage.app",
+    messagingSenderId: "1002471005700",
+    appId: "1:1002471005700:web:39f66d78d7273506b79f51",
+    measurementId: "G-37C3EB9VJX"
+  };
+  // =============================================
+
+  // init firebase compat
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // UI nodes
+  const authState = document.getElementById('authState');
+  const adminArea = document.getElementById('adminArea');
+  const userEmail = document.getElementById('userEmail');
+  const btnSignOut = document.getElementById('btnSignOut');
+
   const slugInput = document.getElementById('slug');
   const nameInput = document.getElementById('name');
-  const lipaInput = document.getElementById('lipaNumber');
+  const lipaInput = document.getElementById('lipa');
   const ussdInput = document.getElementById('ussd');
-  const uploadInput = document.getElementById('uploadLink');
-  const showGiftsChk = document.getElementById('showGifts');
-  const showMomentsChk = document.getElementById('showMoments');
+  const uploadOption = document.getElementById('uploadOption');
+  const uploadLink = document.getElementById('uploadLink');
+  const themeColor = document.getElementById('themeColor');
+  const heroInput = document.getElementById('hero');
+  const filestackKeyInput = document.getElementById('filestackKey');
+  const showGifts = document.getElementById('showGifts');
+  const showMoments = document.getElementById('showMoments');
 
-  const addBtn = document.getElementById('addBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const copyBtn = document.getElementById('copyBtn');
-  const eventsList = document.getElementById('eventsList');
-  const jsonPreview = document.getElementById('jsonPreview');
+  const btnSave = document.getElementById('btnSave');
+  const btnLoad = document.getElementById('btnLoad');
+  const btnDelete = document.getElementById('btnDelete');
+  const eventsDiv = document.getElementById('events');
+  const preview = document.getElementById('preview');
+  const uploadsList = document.getElementById('uploadsList');
+  const exportEndpointInput = document.getElementById('exportEndpoint');
 
-  // in-memory model
-  let EVENTS = {}; // shape: { slug: { ... } }
-
-  // Try to fetch /events.json; if not available (file://), fall back to empty
-  async function loadRemoteEvents(){
-    try {
-      if(location.protocol === 'file:') throw new Error('file protocol');
-      const res = await fetch('/events.json', {cache: 'no-store'});
-      if(!res.ok) throw new Error('no events.json');
-      const json = await res.json();
-      // support both { events: {...}} and top-level object
-      if(json && json.events) return json.events;
-      return json;
-    } catch(e){
-      console.warn('Could not load /events.json — starting with blank set', e);
-      return {}; // start blank
-    }
-  }
-
-  function renderList(){
-    eventsList.innerHTML = '';
-    const keys = Object.keys(EVENTS).sort();
-    if(keys.length === 0){
-      eventsList.innerHTML = '<div class="item" style="justify-content:center;color:var(--muted)">No events yet — add one using the form above.</div>';
-      updatePreview();
-      return;
-    }
-    keys.forEach(slug => {
-      const ev = EVENTS[slug];
-      const el = document.createElement('div');
-      el.className = 'item';
-      el.innerHTML = `<div>
-          <div style="font-weight:600">${ev.name || slug}</div>
-          <div class="meta">${slug} • ${ev.showGifts ? 'Gifts' : ''} ${ev.showMoments ? ' Moments' : ''}</div>
-        </div>
-        <div class="controls">
-          <button data-edit="${slug}">Edit</button>
-          <button data-dup="${slug}">Duplicate</button>
-          <button data-delete="${slug}" class="danger">Delete</button>
-        </div>`;
-      eventsList.appendChild(el);
+  // render login UI
+  function renderLogin(){
+    authState.innerHTML = `
+      <div style="margin-bottom:12px"><strong>Admin sign in</strong></div>
+      <input id="loginEmail" type="email" placeholder="your@email.com" style="width:100%;padding:8px;border-radius:8px;margin-bottom:8px" />
+      <input id="loginPass" type="password" placeholder="password" style="width:100%;padding:8px;border-radius:8px;margin-bottom:8px" />
+      <div style="display:flex;gap:8px">
+        <button id="btnSignIn" class="btn btn-primary">Sign in</button>
+        <button id="btnRegister" class="btn">Create admin user</button>
+      </div>
+    `;
+    document.getElementById('btnSignIn').addEventListener('click', () => {
+      const e = document.getElementById('loginEmail').value;
+      const p = document.getElementById('loginPass').value;
+      auth.signInWithEmailAndPassword(e,p).catch(err => alert('Sign in error: ' + err.message));
     });
-    // attach handlers
-    eventsList.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{
-        const edit = btn.getAttribute('data-edit');
-        const del = btn.getAttribute('data-delete');
-        const dup = btn.getAttribute('data-dup');
-        if(edit) loadToForm(edit);
-        if(del){ if(confirm(`Delete event "${del}"?`)){ delete EVENTS[del]; renderList(); } }
-        if(dup){ duplicateEvent(dup); }
-      });
+    document.getElementById('btnRegister').addEventListener('click', async () => {
+      const e = document.getElementById('loginEmail').value;
+      const p = document.getElementById('loginPass').value;
+      if(!e || !p) return alert('Email & password required');
+      try {
+        await auth.createUserWithEmailAndPassword(e,p);
+        alert('Admin user created. You are logged in.');
+      } catch(err){ alert('Create user error: ' + err.message); }
     });
-    updatePreview();
   }
 
-  function updatePreview(){
-    const preview = { events: EVENTS };
-    jsonPreview.textContent = JSON.stringify(preview, null, 2);
-  }
+  // auth listener
+  auth.onAuthStateChanged(async user => {
+    if(user){
+      userEmail.textContent = user.email || user.uid;
+      authState.style.display = 'none';
+      adminArea.style.display = 'block';
+      loadEventsList();
+    } else {
+      userEmail.textContent = '';
+      authState.style.display = 'block';
+      adminArea.style.display = 'none';
+      renderLogin();
+    }
+  });
 
-  function loadToForm(slug){
-    const ev = EVENTS[slug];
-    if(!ev) return;
-    slugInput.value = slug;
-    nameInput.value = ev.name || '';
-    lipaInput.value = ev.lipaNumber || '';
-    ussdInput.value = ev.ussd || '';
-    uploadInput.value = ev.uploadLink || '';
-    showGiftsChk.checked = !!ev.showGifts;
-    showMomentsChk.checked = !!ev.showMoments;
-    // focus name
-    nameInput.focus();
-  }
+  btnSignOut.addEventListener('click', ()=> auth.signOut());
 
-  function clearForm(){
-    slugInput.value = '';
-    nameInput.value = '';
-    lipaInput.value = '';
-    ussdInput.value = '';
-    uploadInput.value = '';
-    showGiftsChk.checked = false;
-    showMomentsChk.checked = false;
-  }
-
-  function sanitizeSlug(s){
-    return s.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-_]/g,'');
-  }
-
-  function addOrUpdate(){
-    const rawSlug = slugInput.value || nameInput.value;
-    if(!rawSlug){ alert('Please provide a slug or event name'); return; }
-    const slug = sanitizeSlug(rawSlug);
-    if(!slug){ alert('Invalid slug — use letters and numbers only'); return; }
-    const item = {
+  // create / update event
+  btnSave.addEventListener('click', async () => {
+    const slug = (slugInput.value || nameInput.value || '').toString().trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+    if(!slug) return alert('Provide event slug');
+    const doc = {
       name: nameInput.value || slug,
-      showGifts: !!showGiftsChk.checked,
-      showMoments: !!showMomentsChk.checked,
       lipaNumber: lipaInput.value || null,
       ussd: ussdInput.value || null,
-      uploadLink: uploadInput.value || null
+      uploadOption: uploadOption.value,
+      uploadLink: uploadLink.value || null,
+      filestackKey: filestackKeyInput.value || null,
+      themeColor: themeColor.value || '#D4AF37',
+      hero: heroInput.value || null,
+      showGifts: showGifts.value === 'true' || showGifts.value === true,
+      showMoments: showMoments.value === 'true' || showMoments.value === true,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
-    EVENTS[slug] = item;
-    renderList();
-    clearForm();
-  }
-
-  function duplicateEvent(slug){
-    const ev = EVENTS[slug];
-    if(!ev) return;
-    let newSlug = slug + '-copy';
-    let i=1;
-    while(EVENTS[newSlug]){ newSlug = `${slug}-copy-${i++}`; }
-    EVENTS[newSlug] = Object.assign({}, ev);
-    renderList();
-  }
-
-  // Download events.json file
-  function downloadJson(){
-    const data = { events: EVENTS };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'events.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  // Copy JSON to clipboard
-  async function copyJson(){
-    const data = { events: EVENTS };
-    const text = JSON.stringify(data, null, 2);
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      try { await navigator.clipboard.writeText(text); alert('JSON copied to clipboard'); return; }
-      catch(e){ /* fallback */ }
+    try{
+      await db.collection('events').doc(slug).set(doc, { merge: true });
+      alert('Event saved: ' + slug);
+      loadEventsList();
+    } catch(err){
+      alert('Save error: ' + err.message);
     }
-    // fallback textarea
-    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); ta.remove(); alert('JSON copied to clipboard'); } catch(e){ ta.remove(); alert('Could not copy — download the file instead'); }
+  });
+
+  // load a single event into form
+  btnLoad.addEventListener('click', async () => {
+    const slug = (slugInput.value || '').toString().trim();
+    if(!slug) return alert('Enter slug to load');
+    try{
+      const snap = await db.collection('events').doc(slug).get();
+      if(!snap.exists) return alert('Event not found: ' + slug);
+      const d = snap.data();
+      nameInput.value = d.name || '';
+      lipaInput.value = d.lipaNumber || '';
+      ussdInput.value = d.ussd || '';
+      uploadOption.value = d.uploadOption || 'filestack';
+      uploadLink.value = d.uploadLink || '';
+      filestackKeyInput.value = d.filestackKey || '';
+      themeColor.value = d.themeColor || '#D4AF37';
+      heroInput.value = d.hero || '';
+      showGifts.value = d.showGifts ? 'true' : 'false';
+      showMoments.value = d.showMoments ? 'true' : 'false';
+      preview.textContent = JSON.stringify(d, null, 2);
+      // render uploads for this event
+      await loadUploadsFor(slug);
+    } catch(e){ alert('Load error: ' + e.message); }
+  });
+
+  // delete event
+  btnDelete.addEventListener('click', async () => {
+    const slug = (slugInput.value || '').toString().trim();
+    if(!slug) return alert('Enter slug to delete');
+    if(!confirm('Delete event ' + slug + '?')) return;
+    try{
+      await db.collection('events').doc(slug).delete();
+      alert('Deleted');
+      loadEventsList();
+      uploadsList.innerHTML = 'No event selected — load an event to view uploads.';
+    } catch(e){ alert('Delete error: ' + e.message); }
+  });
+
+  // list events
+  async function loadEventsList(){
+    try{
+      const snapshot = await db.collection('events').orderBy('updatedAt','desc').limit(200).get();
+      eventsDiv.innerHTML = '';
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const slug = doc.id;
+        const el = document.createElement('div');
+        el.className = 'event';
+        // generate bridge URL
+        const base = location.origin + location.pathname.replace(/admin\.html$/, '');
+        const url = base + '?e=' + encodeURIComponent(slug);
+        // QR via qrserver API
+        const qr = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;
+        el.innerHTML = `<div>
+          <div style="font-weight:600">${escapeHtml(d.name || slug)}</div>
+          <div class="small">${escapeHtml(slug)} • ${d.showGifts ? 'Gifts' : ''} ${d.showMoments ? ' Moments' : ''}</div>
+          <div class="small" style="margin-top:6px"><a href="${url}" target="_blank" style="color:var(--muted)">${url}</a></div>
+        </div>
+        <div style="text-align:right">
+          <img src="${qr}" class="qr" alt="QR"/>
+          <div style="height:8px"></div>
+          <div class="controls" style="display:flex;flex-direction:column;align-items:flex-end">
+            <div style="display:flex;gap:6px">
+              <button data-copy="${slug}">Copy URL</button>
+              <button data-edit="${slug}">Edit</button>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button data-uploads="${slug}">Show uploads</button>
+              <button data-export="${slug}">Export ZIP</button>
+            </div>
+          </div>
+        </div>`;
+        eventsDiv.appendChild(el);
+      });
+
+      // attach handlers
+      eventsDiv.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', (ev)=>{
+          const edit = btn.getAttribute('data-edit');
+          const copy = btn.getAttribute('data-copy');
+          const uploads = btn.getAttribute('data-uploads');
+          const exp = btn.getAttribute('data-export');
+          if(edit) { slugInput.value = edit; btnLoad.click(); }
+          if(copy) {
+            const base = location.origin + location.pathname.replace(/admin\.html$/, '');
+            const url = base + '?e=' + encodeURIComponent(copy);
+            navigator.clipboard?.writeText(url).then(()=> alert('URL copied to clipboard'));
+          }
+          if(uploads) {
+            loadUploadsFor(uploads);
+          }
+          if(exp) {
+            exportZipFor(exp);
+          }
+        });
+      });
+
+      preview.textContent = '[loaded list — select an event to preview JSON]';
+    } catch(e){
+      console.error(e);
+      preview.textContent = 'Could not load events list: ' + (e && e.message);
+    }
   }
 
-  // wire buttons
-  addBtn.addEventListener('click', addOrUpdate);
-  clearBtn.addEventListener('click', (e)=>{ e.preventDefault(); clearForm(); });
-  downloadBtn.addEventListener('click', (e)=>{ e.preventDefault(); downloadJson(); });
-  copyBtn.addEventListener('click', (e)=>{ e.preventDefault(); copyJson(); });
+  // load uploads for a slug and render thumbnails
+  async function loadUploadsFor(slug) {
+    uploadsList.innerHTML = 'Loading uploads…';
+    try {
+      const snaps = await db.collection('events').doc(slug).collection('uploads').orderBy('createdAt','desc').limit(200).get();
+      uploadsList.innerHTML = '';
+      if (snaps.empty) {
+        uploadsList.innerHTML = '<div class="muted">No uploads yet for this event.</div>';
+        return;
+      }
+      snaps.forEach(doc => {
+        const d = doc.data();
+        const a = document.createElement('a');
+        a.className = 'upload-thumb';
+        a.href = d.url || '#';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = d.filename || (d.url || '').split('/').pop();
+        if (d.url && (d.mimetype || '').startsWith('image')) {
+          const img = document.createElement('img');
+          img.src = d.url;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          a.appendChild(img);
+        } else {
+          a.textContent = d.filename ? (d.filename.length > 12 ? d.filename.slice(0,12)+'…' : d.filename) : 'file';
+        }
+        // right-click copy link hint
+        a.addEventListener('contextmenu', (ev) => {
+          ev.preventDefault();
+          navigator.clipboard?.writeText(d.url || '').then(()=> alert('File URL copied to clipboard'));
+        });
+        uploadsList.appendChild(a);
+      });
+    } catch (err) {
+      console.error('Could not load uploads', err);
+      uploadsList.innerHTML = '<div class="muted">Error loading uploads (see console).</div>';
+    }
+  }
 
-  // load remote events and render
-  EVENTS = await loadRemoteEvents();
-  renderList();
+  // export zip for a slug by calling a server endpoint (Cloud Function / Netlify function)
+  async function exportZipFor(slug) {
+    const endpoint = (exportEndpointInput && exportEndpointInput.value && exportEndpointInput.value.trim()) || '';
+    if (!endpoint) return alert('Enter Export function URL in the "Export function URL" field first.');
+    // POST { slug } to endpoint
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug })
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error('Server responded ' + res.status + ' — ' + txt);
+      }
+      const json = await res.json();
+      // Expect { url: 'https://...' } or { downloadUrl: '...' }
+      const dl = json.url || json.downloadUrl || json.link || null;
+      if (dl) {
+        window.open(dl, '_blank');
+        alert('Export started — opened download (or link).');
+      } else {
+        alert('Export request accepted. Check server logs or response: ' + JSON.stringify(json));
+      }
+    } catch (err) {
+      console.error('Export failed', err);
+      alert('Export failed: ' + (err && err.message));
+    }
+  }
 
-})();
-</script>
+  function escapeHtml(s){
+    if(!s) return '';
+    return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]); });
+  }
+
+  // initial state
+  uploadsList.innerHTML = 'No event selected — load an event to view uploads.';
+
+  </script>
 </body>
 </html>
